@@ -3,54 +3,59 @@
 
 \begin{tikzpicture}[remember picture, overlay]
     \node[inner sep=0pt] at (current page.center) {
-        \includegraphics[width=\dimexpr\paperwidth-2cm\relax, height=\dimexpr\paperheight-2cm\relax]{assets/border.png}
+        \includegraphics[width=\dimexpr\paperwidth-2cm\relax, height=\dimexpr\paperheight-2cm\relax]{assets/branding/border.png}
     };
 \end{tikzpicture}
 
 \begin{center}
     \vspace*{0.2cm}
-    
+
     {\fontsize{16pt}{20pt}\selectfont\bfseries \university \par}
-    
+
     \vspace{0.3cm}
-    
+
     {\fontsize{14pt}{18pt}\selectfont\bfseries \faculty \par}
-    
+
     \vspace{1.0cm}
-    
-    \includegraphics[width=0.32\textwidth]{assets/logo.png}
-    
+
+    \includegraphics[width=0.25\textwidth]{assets/branding/logo.png}
+
     \vspace{1.1cm}
-    
+
     {\fontsize{24pt}{28pt}\selectfont\bfseries\color{titlecolor} \projecttitle \par}
-    
+
     \vspace{0.4cm}
-    
+
     {\fontsize{22pt}{26pt}\selectfont\bfseries \projectsubtitle \par}
-    
+
+    \vspace{0.5cm}
+
+    {\fontsize{12pt}{16pt}\selectfont\textbf{Giảng viên hướng dẫn:} \instructorname \par}
+
     \vfill
-    
-    \begin{minipage}{0.82\textwidth}
+
+    \begin{minipage}{0.9\textwidth}
         {\color{dividerline}\hrule height 0.6pt}
-        \vspace{0.45cm}
-        
+        \vspace{0.35cm}
+
         \centering
-        {\fontsize{13pt}{19pt}\selectfont
-        \begin{tabular}{ll}
-            \textbf{Họ và tên:} & \authorname \\
-            \textbf{MSSV:} & \authorid \\
-            \textbf{Lớp:} & \classname \\
-            \textbf{Email:} & \href{mailto:\authoremail}{\color{black}\authoremail} \\
-            \textbf{Giảng viên hướng dẫn:} & \instructorname \\
+        {\fontsize{11pt}{15pt}\selectfont
+        \renewcommand{\arraystretch}{1.35}
+        \begin{tabular}{|p{7cm}|p{5cm}|}
+            \hline
+            \textbf{Tên} & \textbf{MSSV} \\
+            \hline
+            \studentrows
+            \hline
         \end{tabular}
         \par}
-        
-        \vspace{0.45cm}
+
+        \vspace{0.35cm}
         {\color{dividerline}\hrule height 0.6pt}
     \end{minipage}
-    
+
     \vfill
-    
+
     {\fontsize{11pt}{14pt}\selectfont \submissiondate \par}
     \vspace*{0.2cm}
 \end{center}

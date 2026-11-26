@@ -1,8 +1,10 @@
+# LaTeX build output
+build/
+/main.pdf
 *.aux
 *.log
 *.toc
 *.out
-!main.pdf
 *.synctex.gz
 *.fls
 *.fdb_latexmk
@@ -18,6 +20,8 @@
 *.idx
 *.ind
 *.ilg
+
+# Editors and OS files
 .DS_Store
 Thumbs.db
 .vscode/

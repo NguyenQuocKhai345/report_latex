@@ -1,11 +1,14 @@
 \documentclass[a4paper, 12pt]{article}
 
-\input{metadata}
+% Entry point: report data, style, and content live in their own files.
+\input{metadata/metadata}
 \input{style/config}
 \input{style/header_footer}
 
 \begin{document}
 
+% Give the unnumbered cover a distinct PDF page anchor before arabic numbering.
+\pagenumbering{roman}
 \input{style/cover_page}
 
 \pagenumbering{arabic}
@@ -14,7 +17,11 @@
 \tableofcontents
 \newpage
 
-\input{chapter/01_intro}
-\input{chapter/02_summary}
+\input{chapters/01_introduction}
+\input{chapters/02_overview}
+
+\printbibliography[heading=bibintoc,title={Tài liệu tham khảo}]
+
+\input{appendix/appendix}
 
 \end{document}

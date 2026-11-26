@@ -1,25 +1,31 @@
+\setlength{\headheight}{40pt}
+\setlength{\footskip}{25pt}
+
 \pagestyle{fancy}
 \fancyhf{}
-
-\fancyhead[L]{\fontsize{10pt}{12pt}\selectfont\color{hfcolor}\textbf{FIT-HCMUS}}
-\fancyhead[R]{\fontsize{10pt}{12pt}\selectfont\color{hfcolor}\textbf{University of Science - VNUHCM}}
-
-\fancyfoot[L]{\fontsize{10pt}{12pt}\selectfont\color{hfcolor}\textbf{\department}}
-\fancyfoot[R]{\fontsize{10pt}{12pt}\selectfont\color{hfcolor}\textbf{\thepage\ / \pageref{LastPage}}}
+\fancyhead[L]{%
+  \includegraphics[height=8mm]{assets/branding/logo.png}%
+  \hspace{0.5em}%
+  \begin{tabular}[c]{@{}l@{}}
+    \fontsize{9pt}{11pt}\selectfont\bfseries\color{titlecolor}
+    Trường Đại học Bách khoa -- ĐHQG-HCM \\
+    \fontsize{8pt}{10pt}\selectfont\bfseries\color{hfcolor}
+    \faculty
+  \end{tabular}%
+}
+\fancyfoot[L]{\fontsize{9pt}{11pt}\selectfont\color{hfcolor}\course\quad|\quad\semester}
+\fancyfoot[R]{\fontsize{9pt}{11pt}\selectfont\color{hfcolor}\thepage\ / \pageref{LastPage}}
 
 \renewcommand{\headrulewidth}{0.6pt}
 \renewcommand{\footrulewidth}{0.6pt}
 \renewcommand{\headrule}{\hbox to\headwidth{\color{hfrule}\leaders\hrule height \headrulewidth\hfill}}
 \renewcommand{\footrule}{\hbox to\headwidth{\color{hfrule}\leaders\hrule height \footrulewidth\hfill}}
 
-\setlength{\headheight}{16pt}
-\setlength{\footskip}{25pt}
-
-\fancypagestyle{plain}{
-    \fancyhf{}
-    \fancyfoot[L]{\fontsize{10pt}{12pt}\selectfont\color{hfcolor}\textbf{\department}}
-    \fancyfoot[R]{\fontsize{10pt}{12pt}\selectfont\color{hfcolor}\textbf{\thepage\ / \pageref{LastPage}}}
-    \renewcommand{\headrulewidth}{0pt}
-    \renewcommand{\footrulewidth}{0.6pt}
-    \renewcommand{\footrule}{\hbox to\headwidth{\color{hfrule}\leaders\hrule height \footrulewidth\hfill}}
+\fancypagestyle{plain}{%
+  \fancyhf{}
+  \fancyfoot[L]{\fontsize{9pt}{11pt}\selectfont\color{hfcolor}\course\quad|\quad\semester}
+  \fancyfoot[R]{\fontsize{9pt}{11pt}\selectfont\color{hfcolor}\thepage\ / \pageref{LastPage}}
+  \renewcommand{\headrulewidth}{0pt}
+  \renewcommand{\footrulewidth}{0.6pt}
+  \renewcommand{\footrule}{\hbox to\headwidth{\color{hfrule}\leaders\hrule height \footrulewidth\hfill}}
 }
