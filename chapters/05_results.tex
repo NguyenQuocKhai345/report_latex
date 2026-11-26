@@ -1,0 +1,61 @@
+\section{Kết quả và phân tích}
+\label{sec:results}
+
+\subsection{Kết quả kiểm thử chức năng}
+Kết quả kiểm thử chức năng được tổng hợp trong Bảng~\ref{tab:functional-results}.\cite{prj3source}
+
+\begin{table}[H]
+\centering
+\caption{Tổng hợp số lượng và kết quả kiểm thử chức năng}
+\label{tab:functional-results}
+\small
+\begin{tabular}{|p{2.1cm}|p{2.5cm}|p{2.1cm}|p{6.0cm}|}
+\hline
+\textbf{Feature} & \textbf{Số case L1 / L2} & \textbf{Kết quả} & \textbf{Ghi chú} \\
+\hline
+001 -- Category & 30 / 30 & 30/30 mỗi mức & Các ca Level 1 từng FAIL đã chạy lại và PASS. \\
+\hline
+002 -- Group & 57 / 57 & 57/57 mỗi mức & Kết quả ban đầu 52/57; sau cập nhật expected theo Moodle 5.1.9 và sửa TC-002-054, đạt 57/57. \\
+\hline
+003 -- User & 25 / 25 & 25/25 mỗi mức & Chạy trên Moodle cục bộ bằng Chrome. \\
+\hline
+004 -- Quiz & 22 / 22 & Chưa có kết quả tổng hợp &  \\
+\hline
+005 -- Course & 61 / 67 & Level 1: 61/61; Level 2: 67/67 & Chạy trên Moodle cục bộ. \\
+\hline
+\end{tabular}
+\end{table}
+
+Tổng bộ dữ liệu gồm 195 ID ca Level 1 và 201 ID ca Level 2. Feature 001 chưa có kết quả tổng hợp toàn bộ Level 1; Feature 004 chưa có kết quả tổng hợp chức năng.
+
+\subsection{Kết quả kiểm thử phi chức năng}
+\begin{table}[H]
+\centering
+\caption{Kết quả kiểm thử phi chức năng}
+\label{tab:nfr-results}
+\small
+\begin{tabular}{|p{2.2cm}|p{3.4cm}|p{7.1cm}|}
+\hline
+\textbf{Feature} & \textbf{Kết quả} & \textbf{Chi tiết} \\
+\hline
+001 -- Category & Hiệu năng: PASS cả hai kịch bản. Tương thích: 4/6 PASS, 2/6 FAIL. & Hiệu năng: warm-up và 5 lần đo mỗi kịch bản; ngưỡng tải form 3s, submit 5s. Chrome và Edge: desktop/tablet PASS; mobile 390x844 FAIL do tràn ngang 235px (ngưỡng 20px). \\
+\hline
+002 -- Group & Chưa có kết quả. &  \\
+\hline
+003 -- User & Hiệu năng và tương thích: PASS. & 5 lần đo sau warm-up: median 0,406s, max 0,449s (ngưỡng 2,0s / 5,0s). Trên Chrome ở desktop, tablet và mobile, control chính hiển thị và không có tràn ngang. \\
+\hline
+004 -- Quiz & Hiệu năng: PASS; tương thích: PASS 6/6 cấu hình. & Tải form: mean 0,420s, max 0,576s; submit: mean 1,730s, max 1,864s. Chrome và Edge ở ba viewport; các control đều hiển thị, không có tràn ngang. \\
+\hline
+005 -- Course & Hiệu năng: 2/3 kịch bản PASS; bảo mật: 8/8 PASS. & PERF-01 tải form: mean 4,68s, max 6,35s, vượt ngưỡng 3s/5s. PERF-02: mean 1,33s, max 3,08s; PERF-03: mean 3,12s, max 3,71s. Tám payload không kích hoạt alert, không hiển thị HTML chưa mã hóa và không làm lộ lỗi cơ sở dữ liệu. \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Diễn giải}
+\begin{enumerate}
+  \item \textbf{Dữ liệu hóa giúp thay đổi case không phải sửa luồng thao tác.} Với Level 1, thay đổi chính nằm trong dòng CSV. Level 2 mở rộng ý tưởng này sang URL và locator; Feature 005 còn mô tả chuỗi bước bằng keyword.
+  \item \textbf{Expected phụ thuộc phiên bản/cấu hình Moodle.} Feature 002 cho thấy một kỳ vọng của Project 2 không khớp Moodle 5.1.9: trường khóa yêu cầu tối thiểu tám ký tự; một số giá trị khác dẫn đến lỗi cơ sở dữ liệu trên cấu hình PostgreSQL. Cập nhật expected giúp suite phản ánh môi trường đích, nhưng cần lưu lại lý do để tránh làm mất dấu khác biệt với yêu cầu gốc.
+  \item \textbf{Hiệu năng cục bộ không đại diện tải thực tế.} Các bài đo dùng trình duyệt và Moodle local, thường trong một phiên đăng nhập ổn định và số lần lặp nhỏ. Chúng đo thời gian phản hồi của một số thao tác, không phải kiểm thử tải đồng thời hoặc sức chịu tải.
+  \item \textbf{Tương thích cần xem theo từng viewport.} Feature 001 phát hiện tràn ngang lớn trên mobile trong khi desktop/tablet đạt; các kết quả đó giúp khoanh vùng vấn đề giao diện thay vì kết luận chung rằng toàn bộ trang tương thích.
+  \item \textbf{Cần thống nhất lưu kết quả chạy.} Mỗi lần chạy nên lưu thời điểm, trình duyệt, phiên bản Moodle, trạng thái từng ca, thông báo lỗi và screenshot để hỗ trợ tái lập và phân tích lỗi.
+\end{enumerate}

@@ -1,0 +1,36 @@
+\section{Phạm vi chức năng và dữ liệu kiểm thử}
+\label{sec:scope}
+
+\subsection{Năm chức năng kế thừa từ Project 2}
+Project 3 dùng lại các tính năng và mã định danh ca kiểm thử của Project 2. Dữ liệu đầu vào của từng thành viên được lưu trong các thư mục riêng dưới \texttt{Level1/} và \texttt{Level2/}.\cite{prj2report,prj3source}
+
+\begin{table}[H]
+\centering
+\caption{Phạm vi chức năng và bộ dữ liệu trong Project 3}
+\label{tab:functional-scope}
+\small
+\begin{tabular}{|p{1.4cm}|p{3.2cm}|p{3.0cm}|p{6.2cm}|}
+\hline
+\textbf{Feature} & \textbf{Người phụ trách} & \textbf{Số case L1 / L2} & \textbf{Dữ liệu và nội dung chính} \\
+\hline
+001 & Nguyễn Quốc Khải & 30 / 30 & Tạo category; tên, ID number, mô tả, category cha; ECP, BVA và use case. \\
+\hline
+002 & Đặng Ngọc Khiêu & 57 / 57 & Tạo group; tên, ID number, enrolment key, mô tả, visibility, messaging và ảnh/file fixture. \\
+\hline
+003 & Đặng Đình Thiên Quân & 25 / 25 & Tạo user; thông tin đăng nhập, tên, email, tùy chọn hồ sơ, trạng thái và ảnh đại diện. \\
+\hline
+004 & Nguyễn Minh Phúc & 22 / 22 & Tạo quiz; tên, giới hạn thời gian, điểm đạt, số lần làm và thao tác hủy. \\
+\hline
+005 & Hồ Tây Nguyên & 61 / 67 & Tạo course; tên, short name, ID, category, ngày bắt đầu/kết thúc và các thiết lập course. \\
+\hline
+\textbf{Tổng} &  & \textbf{195 / 201} & Số case được đếm theo ID duy nhất trong các file test data. \\
+\hline
+\end{tabular}
+\end{table}
+
+Các ca giữ định dạng ID \texttt{TC-XXX-YYY} từ Project 2. Dữ liệu Feature 001 chia thành 22 ca ECP, 6 ca BVA và 2 ca use case. Feature 002 có 57 ca thuộc các luồng bắt buộc, lưu, ảnh, chính sách khóa, lỗi cơ sở dữ liệu, khôi phục và hủy. Feature 003 chia thành validation (9), valid data (4), boundary (6) và workflow (6). Dữ liệu quiz của Feature 004 gồm 22 trường hợp về tên, thời gian, điểm, số lần làm và hủy. Feature 005 ở Level 1 chia thành fields (29), dates (11) và settings (21). Các kỹ thuật hộp đen này là cơ sở của bộ ca được tự động hóa lại.\cite{blackboxslides,prj2report}
+
+\subsection{Hai mức tự động hóa}
+\label{subsec:automation-levels}
+Ở \textbf{Level 1}, một dòng trong \texttt{test\_data.csv} cung cấp dữ liệu và kết quả mong đợi cho một ca; URL và locator chủ yếu được khai báo trong mã. Ở \textbf{Level 2}, dữ liệu ca vẫn nằm trong CSV, đồng thời URL/path và locator được tách ra \texttt{test\_config.csv}. Với Feature 005, Level 2 biểu diễn ca dưới dạng các bước có keyword, target và value; vì vậy 593 dòng bước tương ứng 67 ID ca, không phải 593 ca độc lập.
+

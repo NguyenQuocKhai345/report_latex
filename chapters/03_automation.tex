@@ -1,0 +1,46 @@
+\section{Thiết kế và triển khai tự động hóa hướng dữ liệu}
+\label{sec:automation}
+
+\subsection{Công nghệ và luồng xử lý}
+Các runner dùng Python 3, Selenium WebDriver và \texttt{unittest}; dữ liệu được đọc bằng thư viện CSV của Python. File yêu cầu thư viện khai báo Selenium trong khoảng phiên bản từ 4.20 đến dưới 5.\cite{prj3source}
+
+Luồng chung của một ca gồm: đọc và kiểm tra cấu trúc CSV; khởi tạo trình duyệt; đăng nhập Moodle; mở trang chức năng; điền hoặc chọn dữ liệu; thực hiện lưu/hủy; đối chiếu trạng thái thực tế với các trường expected; ghi trạng thái và lỗi vào kết quả. Các runner hỗ trợ chọn browser và chạy riêng ca hoặc liệt kê case ở những feature có tùy chọn này.
+
+\subsection{Khác biệt giữa Level 1 và Level 2}
+\begin{table}[H]
+\centering
+\caption{Mức tách dữ liệu và cấu hình trong các feature}
+\label{tab:level-config}
+\small
+\begin{tabular}{|p{2.4cm}|p{5.1cm}|p{5.1cm}|}
+\hline
+\textbf{Feature} & \textbf{Level 1} & \textbf{Level 2} \\
+\hline
+001 -- Category & 30 dòng dữ liệu; URL và locator trong runner. & 30 dòng dữ liệu; 22 dòng cấu hình URL/path và locator trong CSV riêng. \\
+\hline
+002 -- Group & 57 ca; dùng fixture ảnh và file đính kèm. & 57 ca; 35 dòng cấu hình URL và locator; fixture giữ cùng đường dẫn. \\
+\hline
+003 -- User & 25 ca; gọi helper Moodle dùng chung. & 25 ca; CSV cấu hình URL/path và 44 locator; dùng cùng helper. \\
+\hline
+004 -- Quiz & 22 ca; URL/locator trong runner. & 22 ca; tách dữ liệu và 14 dòng cấu hình. \\
+\hline
+005 -- Course & 61 dòng dữ liệu theo nhóm fields/dates/settings. & 593 dòng bước cho 67 ID ca; 43 mục URL/locator trong cấu hình. \\
+\hline
+\end{tabular}
+\end{table}
+
+Level 2 giúp thay địa chỉ Moodle hoặc locator mà không phải sửa logic của runner, nhưng không làm locator độc lập với giao diện: khi cấu trúc Moodle đổi, giá trị locator trong CSV vẫn cần được cập nhật. Riêng Level 2 của Feature 005 là một bộ diễn giải keyword: mỗi dòng biểu diễn một thao tác hoặc bước xác minh, còn các thao tác như \texttt{verifyText}, \texttt{verifyValue}, \texttt{verifyLocation} và \texttt{verifyEval} so sánh kết quả thực tế với dữ liệu.
+
+\subsection{Chi tiết theo feature}
+\begin{itemize}
+  \item \textbf{Feature 001 -- Add a Category:} Dữ liệu có thể sinh chuỗi theo độ dài hoặc pattern; runner kiểm tra biểu mẫu, lỗi bắt buộc/trùng ID, thông tin category đã lưu, category cha và thao tác hủy. Assertion được phân loại theo mục đích như \texttt{created\_details}, \texttt{required\_error}, \texttt{duplicate\_id}, kiểm tra độ dài ID và xác minh parent.
+  \item \textbf{Feature 002 -- Create a Group:} Mỗi ca mô tả flow qua các trường của group. Bộ test bao gồm fixture ảnh và file để kiểm tra upload hợp lệ/không hợp lệ, xác minh trường đã lưu, visibility, messaging và member count. Một số expected phụ thuộc Moodle 5.1.9 và PostgreSQL.
+  \item \textbf{Feature 003 -- Create a New User:} Hai level dùng chung \texttt{common/moodle\_support.py} cho driver, đăng nhập, xử lý form và kiểm tra expected. Helper xác minh validation message, độ dài trường, trang hiện tại, thông báo tạo user và ghi kết quả CSV; lỗi có thể kèm screenshot.
+  \item \textbf{Feature 004 -- Create a Quiz:} Ca dữ liệu bao phủ tên quiz, giới hạn thời gian, điểm đạt, số lần thử và hủy. Mã xử lý vùng Overall feedback/TinyMCE, chờ trạng thái form và fallback JavaScript click khi nút lưu bị che; Level 2 chuyển URL và locator sang cấu hình.
+  \item \textbf{Feature 005 -- Add a New Course:} Level 1 kiểm tra các expected URL, lỗi trường và giá trị đã lưu. Level 2 dùng danh sách bước khai báo trong CSV cùng cấu hình URL/locator; phần này được thiết kế để đổi test data hoặc giao diện cấu hình mà không viết lại keyword runner.
+\end{itemize}
+
+\subsection{Môi trường và khả năng tái chạy}
+Các lần chạy sử dụng Moodle cục bộ với Chrome hoặc Edge. Feature 002 chạy trên Moodle 5.1.9 qua Edge tại \texttt{localhost:8082}; các feature khác chủ yếu sử dụng \texttt{127.0.0.1:9501}. Quiz sử dụng course ID 4 và section ID 16. URL và thông tin đăng nhập được cấu hình theo môi trường chạy.
+
+Thông tin tài khoản được truyền qua biến môi trường thay vì ghi vào báo cáo. Trước khi chạy các ca tạo đối tượng, cần chuẩn bị course/category fixture phù hợp và tránh dùng lại ID/tên duy nhất đã tồn tại; sau khi chạy cần dọn các đối tượng do test tạo. Project 3 yêu cầu nộp mã Python và dữ liệu, không nộp suite Katalon.\cite{prj3brief,prj3source}

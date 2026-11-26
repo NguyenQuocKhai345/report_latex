@@ -1,0 +1,38 @@
+\section{Kiểm thử phi chức năng}
+\label{sec:nonfunctional}
+
+Mỗi thành viên thực hiện ít nhất hai loại kiểm thử phi chức năng. Nhóm sử dụng Selenium để kiểm tra hiệu năng, tương thích giao diện, khả năng truy cập bằng bàn phím và bảo mật đầu vào.\cite{prj3brief,prj3source}
+
+\begin{table}[H]
+\centering
+\caption{Phân công loại kiểm thử phi chức năng}
+\label{tab:nfr-assignment}
+\small
+\begin{tabular}{|p{2.7cm}|p{3.2cm}|p{7.4cm}|}
+\hline
+\textbf{Thành viên / feature} & \textbf{Loại kiểm thử} & \textbf{Cách tiếp cận và công cụ} \\
+\hline
+Nguyễn Quốc Khải / Category & Hiệu năng; tương thích & Đo thời gian tải form và lưu category; kiểm tra control ở desktop/tablet/mobile trên Chrome và Edge. Selenium, \texttt{time.perf\_counter()}. \\
+\hline
+Đặng Ngọc Khiêu / Group & Hiệu năng; truy cập bằng bàn phím & Đo trang Groups sau warm-up; dùng Tab/Enter để mở form, nhập tên và hủy, xác minh trạng thái focus và danh sách. Selenium, \texttt{unittest}. \\
+\hline
+Đặng Đình Thiên Quân / User & Hiệu năng; tương thích & Đo thời gian form sẵn sàng; xác minh control và tràn ngang tại ba viewport. Selenium, \texttt{time.perf\_counter()} và JavaScript đọc kích thước tài liệu. \\
+\hline
+Nguyễn Minh Phúc / Quiz & Hiệu năng; tương thích & Đo tải form và submit; kiểm tra trường tên và nút lưu trên Chrome/Edge ở ba viewport. Selenium và \texttt{time.perf\_counter()}. \\
+\hline
+Hồ Tây Nguyên / Course & Hiệu năng; bảo mật đầu vào & Đo tải form, trang quản lý và submit; đưa payload XSS/HTML/SQL vào các trường định danh, kiểm tra thực thi script và cách nội dung được hiển thị. Selenium. \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Hiệu năng}
+Các script hiệu năng dùng đồng hồ đơn điệu \texttt{time.perf\_counter()} để đo thời gian tải form, hiển thị trang sau thao tác hoặc hoàn tất lưu dữ liệu. Số lần đo và ngưỡng đánh giá khác nhau theo feature; các lần chạy có warm-up được thực hiện trước khi thu thập mẫu. Ngưỡng áp dụng cho môi trường Moodle cục bộ.
+
+\subsection{Tương thích giao diện}
+Các script tương thích tập trung vào Chrome/Edge và ba kích thước viewport đại diện: desktop 1440x1000, tablet 768x1024 và mobile 390x844. Script xác minh các control chính hiển thị/được dùng, sau đó dùng JavaScript so sánh chiều rộng tài liệu với chiều rộng viewport để phát hiện tràn ngang. Ngưỡng chấp nhận khác nhau giữa các thành viên (20px hoặc 40px theo cấu hình), nên kết quả giữa các feature cần được đọc cùng ngưỡng tương ứng.
+
+\subsection{Khả năng truy cập bằng bàn phím}
+Script của Feature 002 gửi phím Tab và Enter để di chuyển focus đến các điều khiển của form Create group, nhập tên nhóm và hủy thao tác. Tiêu chí được mô tả gồm khả năng đi tới các điều khiển, nhập đúng giá trị và không làm thay đổi danh sách nhóm sau khi hủy.
+
+\subsection{Bảo mật đầu vào}
+Script của Feature 005 đưa tám payload XSS, HTML injection và SQL injection vào Full name, Short name và ID number. Tiêu chí đạt gồm không thực thi JavaScript, mã hóa payload HTML khi hiển thị và không để lộ lỗi cơ sở dữ liệu. Phạm vi kiểm thử giới hạn ở các payload và trường đã chọn.

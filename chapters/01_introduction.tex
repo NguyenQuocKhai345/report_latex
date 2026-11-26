@@ -1,16 +1,16 @@
-% Mỗi file trong thư mục này là một chương của báo cáo.
-% Với documentclass article hiện tại, chương được trình bày bằng \section.
 \section{Giới thiệu}
 \label{sec:introduction}
 
-% Trình bày bối cảnh, lý do chọn đề tài, mục tiêu, phạm vi và cấu trúc báo cáo.
-Viết phần giới thiệu đề tài tại đây. Nêu rõ vấn đề cần giải quyết, mục tiêu,
-phạm vi thực hiện và đóng góp chính của báo cáo.
+\subsection{Bối cảnh}
+Trong Project 2, nhóm đã thiết kế các ca kiểm thử hộp đen cho năm chức năng trên Moodle LMS: tạo danh mục khóa học, tạo nhóm trong khóa học, tạo người dùng, tạo bài kiểm tra và tạo khóa học. Project 3 kế thừa bộ ca này để chuyển sang tự động hóa hướng dữ liệu, đồng thời bổ sung kiểm thử phi chức năng. Đề bài yêu cầu hai mức tự động hóa: mức thứ nhất đọc dữ liệu ca kiểm thử từ CSV; mức thứ hai đưa thêm URL và locator của các phần tử giao diện vào dữ liệu cấu hình. Mỗi thành viên còn phải thực hiện ít nhất hai loại kiểm thử phi chức năng.\cite{prj3brief,prj2report}
 
 \subsection{Mục tiêu}
 \label{subsec:objectives}
-Liệt kê các mục tiêu cụ thể của báo cáo.
+Báo cáo trình bày cách chuyển các ca Project 2 thành chương trình Selenium hướng dữ liệu, tổ chức dữ liệu và cấu hình cho hai mức tự động hóa, cùng các kiểm thử phi chức năng. Nội dung cũng tổng hợp phân công và kết quả kiểm thử của năm chức năng.
 
-\subsection{Phạm vi và cấu trúc báo cáo}
-\label{subsec:scope}
-Mô tả phạm vi thực hiện và tóm tắt nội dung của từng chương.
+\subsection{Phạm vi và phương pháp tổng hợp}
+\label{subsec:scope-method}
+Phạm vi gồm đề bài và báo cáo Project 2, đề bài Project 3, bài giảng kiểm thử hộp đen, cùng mã Python và dữ liệu kiểm thử của Project 3. Nhóm sử dụng phương pháp kiểm thử hộp đen và tự động hóa trình duyệt bằng Selenium.\cite{blackboxslides,prj3source}
+
+\subsection{Bố cục báo cáo}
+Chương~\ref{sec:scope} trình bày phạm vi tính năng và quy mô dữ liệu. Chương~\ref{sec:automation} mô tả kiến trúc hai mức. Chương~\ref{sec:nonfunctional} trình bày các kiểm thử phi chức năng. Chương~\ref{sec:results} phân tích kết quả; Chương~\ref{sec:workload} trình bày phân công; Chương~\ref{sec:ai-declaration} khai báo việc sử dụng AI.
