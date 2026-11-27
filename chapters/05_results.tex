@@ -19,14 +19,14 @@ Kết quả kiểm thử chức năng được tổng hợp trong Bảng~\ref{ta
 \hline
 003 -- User & 25 / 25 & 25/25 mỗi mức & Chạy trên Moodle cục bộ bằng Chrome. \\
 \hline
-004 -- Quiz & 22 / 22 & Chưa có kết quả tổng hợp &  \\
+004 -- Quiz & 22 / 22 & 22/22 mỗi mức & Level 1 chạy trong 137,943 giây; Level 2 chạy trong 113,969 giây. \\
 \hline
 005 -- Course & 61 / 67 & Level 1: 61/61; Level 2: 67/67 & Chạy trên Moodle cục bộ. \\
 \hline
 \end{tabular}
 \end{table}
 
-Tổng bộ dữ liệu gồm 195 ID ca Level 1 và 201 ID ca Level 2. Feature 001 chưa có kết quả tổng hợp toàn bộ Level 1; Feature 004 chưa có kết quả tổng hợp chức năng.
+Tổng bộ dữ liệu gồm 195 ID ca Level 1 và 201 ID ca Level 2. Cả hai mức của Feature 004 đều hoàn thành 22/22 ca kiểm thử chức năng.
 
 \subsection{Kết quả kiểm thử phi chức năng}
 \begin{table}[H]
@@ -40,7 +40,7 @@ Tổng bộ dữ liệu gồm 195 ID ca Level 1 và 201 ID ca Level 2. Feature 0
 \hline
 001 -- Category & Hiệu năng: PASS cả hai kịch bản. Tương thích: 4/6 PASS, 2/6 FAIL. & Hiệu năng: warm-up và 5 lần đo mỗi kịch bản; ngưỡng tải form 3s, submit 5s. Chrome và Edge: desktop/tablet PASS; mobile 390x844 FAIL do tràn ngang 235px (ngưỡng 20px). \\
 \hline
-002 -- Group & Chưa có kết quả. &  \\
+002 -- Group & Hiệu năng: PASS; bàn phím: PASS. & 7 lần đo sau warm-up: median <= 2,0s, max <= 5,0s; dùng Tab/Enter mở form, nhập tên rồi hủy; focus đúng, tên nhập chính xác, danh sách nhóm không đổi. \\
 \hline
 003 -- User & Hiệu năng và tương thích: PASS. & 5 lần đo sau warm-up: median 0,406s, max 0,449s (ngưỡng 2,0s / 5,0s). Trên Chrome ở desktop, tablet và mobile, control chính hiển thị và không có tràn ngang. \\
 \hline
