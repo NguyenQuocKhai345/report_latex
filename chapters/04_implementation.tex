@@ -8,10 +8,10 @@ Theo tài liệu PRJ1, C05 tiếp nhận scan, C06 xác minh QR, C07 quyết đ�
 \begin{table}[htbp]
 \centering
 \caption{Ánh xạ trách nhiệm C05--C09 tới mã nguồn PRJ2}\label{tab:c-mapping}
-\begin{tabular}{|p{0.09\linewidth}|p{0.22\linewidth}|p{0.36\linewidth}|p{0.22\linewidth}|}\hline
+\begin{tabular}{|>{\raggedright\arraybackslash}p{0.09\linewidth}|>{\raggedright\arraybackslash}p{0.22\linewidth}|>{\raggedright\arraybackslash}p{0.36\linewidth}|>{\raggedright\arraybackslash}p{0.22\linewidth}|}\hline
 \textbf{Mã} & \textbf{Trách nhiệm PRJ1} & \textbf{Ánh xạ hiện tại} & \textbf{Mức chứng minh} \\\hline
 C05 & Tiếp nhận scan, xác thực kiosk và trả kết quả & \texttt{ScanController}, DTO scan và \texttt{AccessService} trong access-event-service & Endpoint backend đã có; kiosk vật lý thuộc phạm vi tích hợp client. \\\hline
-C06 & Xác minh QR & \texttt{AccessPolicy}/\texttt{RemoteAccessPolicy} và client API; QR service quản lý credential & Có hợp đồng/API; tích hợp phụ thuộc cấu hình và môi trường triển khai. \\\hline
+C06 & Xác minh QR & \texttt{AccessPolicy}/\allowbreak\texttt{RemoteAccessPolicy} và client API; QR service quản lý credential & Có hợp đồng/API; tích hợp phụ thuộc cấu hình và môi trường triển khai. \\\hline
 C07 & Quyết định quyền truy cập & Ca sử dụng Access gọi policy và quản lý trạng thái lệnh & Luồng nghiệp vụ Access hiện có; quyền nhân viên/nhà máy do Identity/Gate cung cấp. \\\hline
 C08 & Ghi event, intent, history và outbox & \texttt{AccessStore}, \texttt{JpaAccessStore}, repository, migration và outbox & PostgreSQL, transaction và invariant được bao quát bởi kiểm thử. \\\hline
 C09 & Điều phối lệnh cổng và lưu outcome & Controller command/confirmation, \texttt{GateCommand}, client và \texttt{GateSimulator} & Hợp đồng và mô phỏng đã có; chưa nghiệm thu với turnstile vật lý. \\\hline
@@ -41,7 +41,7 @@ Các service ghi outbox trong transaction database của chính owner rồi publ
 \begin{table}[htbp]
 \centering
 \caption{Truy vết yêu cầu M2 và giới hạn chứng cứ}\label{tab:traceability}
-\begin{tabular}{|p{0.13\linewidth}|p{0.38\linewidth}|p{0.37\linewidth}|}\hline
+\begin{tabular}{|>{\raggedright\arraybackslash}p{0.13\linewidth}|>{\raggedright\arraybackslash}p{0.38\linewidth}|>{\raggedright\arraybackslash}p{0.37\linewidth}|}\hline
 \textbf{Yêu cầu} & \textbf{Hiện thực/tài liệu liên quan} & \textbf{Trạng thái bằng chứng} \\\hline
 FR-01/02 & Identity User, QR service, API docs và test & Có code service; cần xác nhận tích hợp end-to-end trên môi trường hoàn chỉnh. \\\hline
 FR-03/09 & Gate Station, Access command/confirmation và simulator & Hợp đồng backend/mô phỏng; chưa nghiệm thu phần cứng cổng. \\\hline

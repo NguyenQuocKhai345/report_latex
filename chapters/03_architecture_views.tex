@@ -8,7 +8,7 @@ Các module nghiệp vụ và trách nhiệm được tổng hợp tại Bảng~
 \begin{table}[htbp]
 \centering
 \caption{Các service nghiệp vụ và kho dữ liệu sở hữu}\label{tab:services}
-\begin{tabular}{|p{0.25\linewidth}|p{0.43\linewidth}|p{0.22\linewidth}|}\hline
+\begin{tabular}{|>{\raggedright\arraybackslash}p{0.25\linewidth}|>{\raggedright\arraybackslash}p{0.43\linewidth}|>{\raggedright\arraybackslash}p{0.22\linewidth}|}\hline
 \textbf{Service} & \textbf{Trách nhiệm chính} & \textbf{Kho dữ liệu} \\\hline
 Identity \& User & Nhân viên, tài khoản, OAuth2, vai trò và quyền nhà máy & PostgreSQL \\\hline
 QR & Phát hành, ký, xác minh, thu hồi và redemption credential & PostgreSQL \\\hline
@@ -30,22 +30,22 @@ Hình~\ref{fig:runtime-flow} mô tả luồng thực thi chính và các ranh gi
 \centering
 \resizebox{\textwidth}{!}{%
 \begin{tikzpicture}[node distance=0.75cm and 0.8cm, box/.style={draw, rounded corners, align=center, minimum width=2.35cm, minimum height=0.8cm, font=\small}, arr/.style={->, thick}]
-\node[box] (client) {Web / Mobile / Kiosk};
-\node[box, right=of client] (gateway) {API Gateway\\OAuth2 / route};
-\node[box, right=of gateway] (access) {Access Event\\C05--C09};
-\node[box, above right=of access] (policy) {Identity / QR /\\Gate policy API};
-\node[box, below right=of access] (db) {PostgreSQL\\scan + command + outbox};
-\node[box, right=of db] (mq) {RabbitMQ\\persistent events};
-\node[box, right=of mq] (consumers) {Attendance / Audit\\HR Integration};
-\node[box, above=of policy] (turnstile) {Kiosk LAN adapter\\Turnstile API};
-\draw[arr] (client)--(gateway);
-\draw[arr] (gateway)--(access);
-\draw[arr] (access)--(policy);
-\draw[arr] (access)--(db);
-\draw[arr] (access) to[bend left=18] (turnstile);
-\draw[arr] (turnstile) to[bend left=18] (access);
-\draw[arr] (db)--(mq);
-\draw[arr] (mq)--(consumers);
+\node[box] (client) at (0,0) {Web / Mobile / Kiosk};
+\node[box] (gateway) at (3.5,0) {API Gateway\\OAuth2 / route};
+\node[box] (access) at (6.4,0) {Access Event\\C05--C09};
+\node[box] (policy) at (6.4,2.0) {Identity / QR /\\Gate policy API};
+\node[box] (turnstile) at (6.4,-2.0) {Kiosk LAN adapter\\Turnstile API};
+\node[box] (db) at (9.5,0) {PostgreSQL\\scan + command\\+ outbox};
+\node[box] (mq) at (12.6,0) {RabbitMQ\\persistent events};
+\node[box] (consumers) at (15.7,0) {Attendance / Audit\\HR Integration};
+\draw[arr] (client.east)--(gateway.west);
+\draw[arr] (gateway.east)--(access.west);
+\draw[arr] (access.north)--(policy.south);
+\draw[arr] (access.east)--(db.west);
+\draw[arr] (access.south west)--(turnstile.north west);
+\draw[arr] (turnstile.north east)--(access.south east);
+\draw[arr] (db.east)--(mq.west);
+\draw[arr] (mq.east)--(consumers.west);
 \end{tikzpicture}
 }%
 \caption{Luồng runtime của yêu cầu scan và truyền sự kiện bất đồng bộ}
@@ -86,7 +86,7 @@ Hình~\ref{fig:allocation} thể hiện phương án phân bổ triển khai d�
 \begin{table}[htbp]
 \centering
 \caption{Các quyết định kiến trúc ảnh hưởng trực tiếp tới lát cắt C05--C09}\label{tab:adrs}
-\begin{tabular}{|p{0.12\linewidth}|p{0.35\linewidth}|p{0.43\linewidth}|}\hline
+\begin{tabular}{|>{\raggedright\arraybackslash}p{0.12\linewidth}|>{\raggedright\arraybackslash}p{0.35\linewidth}|>{\raggedright\arraybackslash}p{0.43\linewidth}|}\hline
 \textbf{ADR} & \textbf{Quyết định} & \textbf{Hệ quả/đánh đổi} \\\hline
 ADR-01 & Bảy service nghiệp vụ Java; ba ứng dụng hạ tầng & Tách ownership và triển khai; tăng chi phí mạng, cấu hình và vận hành. \\\hline
 ADR-02 & Database logic riêng theo service; không đọc/ghi chéo & Giảm coupling dữ liệu; cần API/event và nhất quán cuối cùng. \\\hline

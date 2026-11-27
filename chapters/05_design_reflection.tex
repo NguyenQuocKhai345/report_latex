@@ -6,7 +6,7 @@
 \begin{table}[htbp]
 \centering
 \caption{Ánh xạ SOLID vào module Access Event}\label{tab:solid}
-\begin{tabular}{|p{0.10\linewidth}|p{0.40\linewidth}|p{0.38\linewidth}|}\hline
+\begin{tabular}{|>{\raggedright\arraybackslash}p{0.10\linewidth}|>{\raggedright\arraybackslash}p{0.40\linewidth}|>{\raggedright\arraybackslash}p{0.38\linewidth}|}\hline
 \textbf{Nguyên tắc} & \textbf{Ví dụ trong mã nguồn} & \textbf{Tác dụng và giới hạn} \\\hline
 SRP & Controller tiếp nhận request; \texttt{AccessService} điều phối ca sử dụng; \texttt{JpaAccessStore} lưu dữ liệu; \texttt{OutboxPublisher} phát sự kiện & Tách biệt giao thức, nghiệp vụ, lưu trữ và truyền thông điệp; một số kiểu lỗi vẫn phụ thuộc Spring. \\\hline
 OCP & \texttt{AccessPolicy} định nghĩa hợp đồng xác minh chính sách; adapter từ xa được tách khỏi ca sử dụng & Có thể thay adapter mà không sửa quy tắc xử lý lặp; các implementation phải duy trì cùng hợp đồng. \\\hline
@@ -18,7 +18,7 @@ DIP & Ca sử dụng nhận \texttt{AccessStore}, \texttt{AccessPolicy} và \tex
 
 Các nguyên tắc trên được thể hiện qua sự phân tách giữa ca sử dụng, giao diện xác minh chính sách, giao diện lưu trữ và các adapter persistence/client. Việc áp dụng SOLID không đồng nghĩa mọi dịch vụ đều đạt mức phân lớp hoàn toàn; một số kiểu lỗi vẫn gắn với framework và các invariant cạnh tranh còn phụ thuộc vào cơ sở dữ liệu. Bộ kiểm thử có thể điều khiển policy và clock, trong khi callback và xử lý review sử dụng khóa command để ngăn áp dụng lặp.
 
-\subsection{Phản tư}
+\subsection{Thách thức}
 \label{subsec:reflection}
 Thách thức trọng tâm là duy trì tính nhất quán trạng thái khi request hoặc phản hồi bị mất. Quyết định ALLOW, kết quả thiết bị OPENED và bằng chứng PASSED được mô hình hóa riêng biệt, bởi việc đồng nhất các trạng thái này có thể dẫn tới ghi nhận công khi chưa có bằng chứng passage. Cơ sở dữ liệu và message broker không thuộc cùng một transaction; do đó, outbox/inbox, loại bỏ sự kiện trùng và quy trình đối soát được xem xét ngay trong thiết kế ca sử dụng.
 
@@ -31,5 +31,6 @@ SOLID giúp xác định phạm vi thay đổi khi hợp đồng bên ngoài bi�
 Backend được tổ chức thành các miền nghiệp vụ Spring Boot. Lát cắt Access Event hiện thực tiếp nhận scan, trừu tượng hóa policy, lưu command/evidence, transactional outbox và review bằng chứng đến muộn. Các miền Attendance, HR và Audit/Notification cung cấp cơ chế snapshot, receipt, loại bỏ dữ liệu trùng và phục hồi theo mô tả trong tài liệu cùng mã nguồn. Thiết kế xử lý các rủi ro M2 thông qua ID ổn định, trạng thái UNKNOWN, transaction/outbox và QR ký số có thời hạn, có thể thu hồi.
 
 Các kết quả hiện có chưa chứng minh ngưỡng phản hồi hai giây, khả năng vận hành offline tại nhà máy, tính sẵn sàng cao trong production hoặc mức độ tương thích với HR/turnstile thực tế. Vì vậy, báo cáo phân biệt các thành phần đã có trong mã nguồn và hợp đồng với kiến trúc triển khai dự kiến; các tiêu chí chưa được đo không được xem là đã đạt. Công việc tiếp theo gồm hoàn thiện frontend/kiosk client, kiểm thử tích hợp với hệ thống ngoài, đánh giá tải tại hai nhà máy và diễn tập mất kết nối/failover.
+
 
 
