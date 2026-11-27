@@ -1,0 +1,35 @@
+﻿\section{SOLID, thách thức và kết luận}
+\label{sec:reflection}
+
+\subsection{Áp dụng SOLID trong mã nguồn}
+\label{subsec:solid}
+\begin{table}[htbp]
+\centering
+\caption{Ánh xạ SOLID vào module Access Event}\label{tab:solid}
+\begin{tabular}{|p{0.10\linewidth}|p{0.40\linewidth}|p{0.38\linewidth}|}\hline
+\textbf{Nguyên tắc} & \textbf{Ví dụ trong mã nguồn} & \textbf{Tác dụng và giới hạn} \\\hline
+SRP & Controller tiếp nhận request; \texttt{AccessService} điều phối ca sử dụng; \texttt{JpaAccessStore} lưu dữ liệu; \texttt{OutboxPublisher} phát sự kiện & Tách biệt giao thức, nghiệp vụ, lưu trữ và truyền thông điệp; một số kiểu lỗi vẫn phụ thuộc Spring. \\\hline
+OCP & \texttt{AccessPolicy} định nghĩa hợp đồng xác minh chính sách; adapter từ xa được tách khỏi ca sử dụng & Có thể thay adapter mà không sửa quy tắc xử lý lặp; các implementation phải duy trì cùng hợp đồng. \\\hline
+LSP & \texttt{AccessStore} quy định hành vi nhận diện scan, phát hiện xung đột payload và ghi nguyên tử & Implementation thay thế phải bảo toàn ngữ nghĩa; adapter giả lập trong bộ kiểm thử không thay thế JDBC khi chạy nhiều instance. \\\hline
+ISP & Policy port và store port chỉ cung cấp các thao tác cần cho luồng scan/review & Giảm phụ thuộc vào API lưu trữ và messaging không liên quan; việc tách nhỏ hơn chỉ cần thiết khi hợp đồng mới đòi hỏi. \\\hline
+DIP & Ca sử dụng nhận \texttt{AccessStore}, \texttt{AccessPolicy} và \texttt{Clock} qua constructor & Cho phép thay dependency trong unit test và tách ca sử dụng khỏi client cụ thể; tính nguyên tử vẫn do transaction và constraint cơ sở dữ liệu bảo đảm. \\\hline
+\end{tabular}
+\end{table}
+
+Các nguyên tắc trên được thể hiện qua sự phân tách giữa ca sử dụng, giao diện xác minh chính sách, giao diện lưu trữ và các adapter persistence/client. Việc áp dụng SOLID không đồng nghĩa mọi dịch vụ đều đạt mức phân lớp hoàn toàn; một số kiểu lỗi vẫn gắn với framework và các invariant cạnh tranh còn phụ thuộc vào cơ sở dữ liệu. Bộ kiểm thử có thể điều khiển policy và clock, trong khi callback và xử lý review sử dụng khóa command để ngăn áp dụng lặp.
+
+\subsection{Phản tư}
+\label{subsec:reflection}
+Thách thức trọng tâm là duy trì tính nhất quán trạng thái khi request hoặc phản hồi bị mất. Quyết định ALLOW, kết quả thiết bị OPENED và bằng chứng PASSED được mô hình hóa riêng biệt, bởi việc đồng nhất các trạng thái này có thể dẫn tới ghi nhận công khi chưa có bằng chứng passage. Cơ sở dữ liệu và message broker không thuộc cùng một transaction; do đó, outbox/inbox, loại bỏ sự kiện trùng và quy trình đối soát được xem xét ngay trong thiết kế ca sử dụng.
+
+Việc phụ thuộc vào port hạn chế liên kết trực tiếp giữa Access với client QR hoặc thiết bị cụ thể, qua đó hỗ trợ kiểm thử và thay thế adapter. Constraint duy nhất và transaction cơ sở dữ liệu kiểm soát tranh chấp giữa nhiều instance; mutex trong một tiến trình không cung cấp bảo đảm tương đương. Đổi lại, kiến trúc phân tán làm tăng yêu cầu vận hành schema, token, broker, retry và backlog. Khi mất WAN, kiosk hiện không tự cấp quyền từ dữ liệu cache; lựa chọn này khác với thiết kế edge của PRJ1 và là đánh đổi kiến trúc cần được đánh giá trong kế hoạch triển khai.
+
+SOLID giúp xác định phạm vi thay đổi khi hợp đồng bên ngoài biến động, nhưng tự thân không bảo đảm an toàn, tính đúng đắn hoặc SLA. Việc nghiệm thu cần bao gồm kiểm thử contract với QR/Identity/Gate, tải đồng thời, phục hồi sau crash tại từng ranh giới, cô lập phạm vi nhà máy và đối soát thiết bị. Simulator chỉ xác minh logic adapter mô phỏng, không thay thế kiểm thử tương thích với phần cứng thực tế.
+
+\subsection{Kết luận}
+\label{subsec:conclusion}
+Backend được tổ chức thành các miền nghiệp vụ Spring Boot. Lát cắt Access Event hiện thực tiếp nhận scan, trừu tượng hóa policy, lưu command/evidence, transactional outbox và review bằng chứng đến muộn. Các miền Attendance, HR và Audit/Notification cung cấp cơ chế snapshot, receipt, loại bỏ dữ liệu trùng và phục hồi theo mô tả trong tài liệu cùng mã nguồn. Thiết kế xử lý các rủi ro M2 thông qua ID ổn định, trạng thái UNKNOWN, transaction/outbox và QR ký số có thời hạn, có thể thu hồi.
+
+Các kết quả hiện có chưa chứng minh ngưỡng phản hồi hai giây, khả năng vận hành offline tại nhà máy, tính sẵn sàng cao trong production hoặc mức độ tương thích với HR/turnstile thực tế. Vì vậy, báo cáo phân biệt các thành phần đã có trong mã nguồn và hợp đồng với kiến trúc triển khai dự kiến; các tiêu chí chưa được đo không được xem là đã đạt. Công việc tiếp theo gồm hoàn thiện frontend/kiosk client, kiểm thử tích hợp với hệ thống ngoài, đánh giá tải tại hai nhà máy và diễn tập mất kết nối/failover.
+
+

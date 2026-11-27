@@ -1,16 +1,22 @@
-% Mỗi file trong thư mục này là một chương của báo cáo.
-% Với documentclass article hiện tại, chương được trình bày bằng \section.
-\section{Giới thiệu}
+﻿\section{Giới thiệu}
 \label{sec:introduction}
 
-% Trình bày bối cảnh, lý do chọn đề tài, mục tiêu, phạm vi và cấu trúc báo cáo.
-Viết phần giới thiệu đề tài tại đây. Nêu rõ vấn đề cần giải quyết, mục tiêu,
-phạm vi thực hiện và đóng góp chính của báo cáo.
+TMC Manufacturing Joint Stock Company vận hành hai nhà máy tại Bình Dương và Long An với quy mô lần lượt xấp xỉ 800 và 600 nhân viên. Nhóm xây dựng hệ thống kiểm soát ra vào và ghi nhận chấm công bằng QR, tích hợp với hệ thống kiểm soát cổng quay và HR/Payroll sẵn có. Báo cáo này trình bày kết quả M2 theo yêu cầu đề bài~\cite{tmc-assignment-m2}, kế thừa phân tích M1~\cite{tmc-project-m1}, tập trung hiện thực nhóm thành phần C05--C09: tiếp nhận lượt quét, xác minh QR, quyết định quyền, lưu dấu vết sự kiện và điều phối lệnh cổng.
 
-\subsection{Mục tiêu}
+Trong thiết kế M1, các thành phần C05--C11 được phân bổ tại edge của từng nhà máy nhằm duy trì xử lý lượt quét khi mất kết nối với trung tâm. Backend M2 được tổ chức thành các dịch vụ Spring Boot triển khai trên máy chủ thuê; kiosk chưa có kho nghiệp vụ cục bộ và không tự cấp quyền khi mất kết nối WAN. Do đó, báo cáo ánh xạ C05--C09 theo trách nhiệm nghiệp vụ vào mã nguồn hiện có, đồng thời xác định chênh lệch giữa thiết kế M1 và kiến trúc M2 như một giới hạn triển khai.
+
+\subsection{Mục tiêu và phạm vi}
 \label{subsec:objectives}
-Liệt kê các mục tiêu cụ thể của báo cáo.
+Mục tiêu là triển khai một lát cắt nghiệp vụ chính có thể nhận scan, áp dụng chính sách, tạo quyết định/lệnh bền vững, tiếp nhận kết quả cổng và phát bằng chứng chấm công. Thiết kế cần xử lý retry, trạng thái kết quả chưa xác định, QR bị lộ, RBAC, audit và giao tiếp bất đồng bộ; phần hiện thực phải áp dụng SOLID và có kiểm thử cho module chính.
 
-\subsection{Phạm vi và cấu trúc báo cáo}
-\label{subsec:scope}
-Mô tả phạm vi thực hiện và tóm tắt nội dung của từng chương.
+Phạm vi sản phẩm bao gồm quản lý người dùng/QR/trạm, ghi sự kiện ra vào, báo cáo và audit, quản trị, và tích hợp HR/Payroll. Trong lát cắt mã nguồn được phân tích, trọng tâm là Access Event cùng các API Identity, QR, Gate Station, Attendance, HR và Audit có liên quan. Hệ thống không tính lương, không quản lý khách và không xây dựng lại phần cứng, turnstile hay hệ thống HR.
+
+\subsection{Yêu cầu và vấn đề M2}
+\label{subsec:requirements-summary}
+Yêu cầu nền tảng gồm phản hồi kiosk không quá 2 giây ở tải đổi ca khoảng 800 lượt trong 30 phút tại mỗi nhà máy; không mất bản ghi chấm công trong vận hành bình thường; phân quyền theo vai trò/phạm vi với audit; bảo vệ dữ liệu cá nhân. M2 bổ sung hai vấn đề cần giải quyết: mất kết nối giữa lúc xử lý giao dịch và QR tĩnh có thể bị lộ. Thiết kế dùng ID ổn định, lưu trạng thái trước khi phản hồi, trạng thái UNKNOWN và đối soát để tránh phát lệnh trùng; QR ký số có thời hạn ngắn, thu hồi và chống replay. Những biện pháp này giảm rủi ro nhưng không tự chứng minh SLA hoặc loại bỏ hoàn toàn việc chia sẻ ảnh QR.
+
+\subsection{Tổ chức báo cáo}
+\label{subsec:report-structure}
+Chương 2 trình bày yêu cầu và các quyết định kiến trúc. Chương 3 mô tả cấu trúc hệ thống qua các góc nhìn module, runtime và allocation. Chương 4 đối chiếu thiết kế với hiện thực C05--C09, kết quả kiểm thử sẵn có và các giới hạn. Chương 5 phân tích việc áp dụng SOLID, các thách thức và kết luận.
+
+

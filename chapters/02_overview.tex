@@ -1,24 +1,53 @@
-\section{Cơ sở lý thuyết và tổng quan}
-\label{sec:background}
+﻿\section{Yêu cầu và lựa chọn kiến trúc}
+\label{sec:requirements-architecture}
 
-% Chia nội dung theo chủ đề bằng subsection/subsubsection.
-Trình bày các khái niệm, công trình liên quan và cơ sở cần thiết cho đề tài.
-Khi sử dụng nguồn bên ngoài, hãy trích dẫn và khai báo nguồn trong
-\texttt{bibliography/references.bib}.
+\subsection{Bối cảnh, tác nhân và chức năng}
+\label{subsec:actors}
+Nhân viên trình QR trên điện thoại; kiosk gắn với một trạm gửi yêu cầu scan; Access Event xác minh và quyết định; hệ thống cổng quay nhận lệnh qua adapter tại mạng nhà máy. HR nhận dữ liệu công theo kỳ qua API. HR, giám sát, bảo vệ, quản trị viên và lãnh đạo sử dụng các chức năng báo cáo, xử lý ngoại lệ hoặc cấu hình theo quyền được cấp. Mã nguồn triển khai xác thực OAuth2/JWT và kiểm tra quyền/phạm vi tại service sở hữu dữ liệu; token hợp lệ không đồng nghĩa có quyền trên mọi nhà máy.
 
-\subsection{Ví dụ công thức}
-\label{subsec:equation-example}
-Có thể viết công thức như sau:
-\begin{equation}
-  A = B + C
-  \label{eq:example}
-\end{equation}
+Các chức năng bao gồm: quản lý nhân viên, tài khoản, vai trò và quyền nhà máy; cấp và thu hồi QR; quản lý nhà máy, cổng và trạm; tiếp nhận scan, quyết định truy cập, lệnh và bằng chứng passage; tổng hợp công, điều chỉnh và chốt snapshot; audit/thông báo; xuất batch sang HR và đối soát receipt. Báo cáo chấm công không đồng nghĩa với tính lương.
 
-\subsection{Ví dụ bảng}
-\label{subsec:table-example}
+\subsection{Yêu cầu chất lượng và tiêu chí thành công}
+\label{subsec:quality-attributes}
 \begin{table}[htbp]
-  \centering
-  \caption{Ví dụ bảng dữ liệu}
-  \label{tab:sample}
-  \input{tables/sample_table}
+\centering
+\caption{Yêu cầu chất lượng và bằng chứng cần có}\label{tab:nfr}
+\begin{tabular}{|p{0.13\linewidth}|p{0.35\linewidth}|p{0.42\linewidth}|}\hline
+\textbf{Mã} & \textbf{Yêu cầu} & \textbf{Tiêu chí kiểm chứng} \\\hline
+NFR-01 & Kiosk phản hồi không quá 2 giây tại tải đổi ca & Đo p95/p99, tỷ lệ lỗi và thời gian xử lý backend/mạng tại cả hai nhà máy; hiện chưa có kết quả benchmark trong bộ hiện vật dự án. \\\hline
+NFR-02 & Không mất sự kiện trong vận hành bình thường & Commit sự kiện và outbox cùng transaction; inbox/consumer chống trùng; kiểm tra crash, retry và phục hồi. \\\hline
+NFR-03 & RBAC và audit & Kiểm tra role, grant theo site, thao tác nhạy cảm và audit bền vững. \\\hline
+NFR-04 & Bảo vệ dữ liệu cá nhân & Tối thiểu hóa PII, phân quyền dữ liệu, TLS/secret khi triển khai và chính sách retention được phê duyệt. \\\hline
+ISSUE-01 & Mất kết nối khi xử lý giao dịch & Tái sử dụng scan/command ID; giữ UNKNOWN khi kết quả chưa rõ; tra cứu/đối soát trước retry có tác động. \\\hline
+ISSUE-02 & QR tĩnh bị lộ & Token QR ký số có hạn, thu hồi và chống replay; kiểm tra chữ ký, expiry, site và credential đã tiêu thụ. \\\hline
+\end{tabular}
 \end{table}
+
+Khoảng 800 lượt/1.800 giây tương đương trung bình khoảng 0,44 lượt/giây/nhà máy; giá trị trung bình không mô tả burst tại thời điểm đổi ca. Mã nguồn và thiết kế có các cơ chế độ tin cậy, nhưng không có kết quả tải thực để kết luận đạt ngưỡng hai giây hay SLA. Hạn QR 60 giây, lệnh 10 giây và clock skew 5 giây là cấu hình thiết kế, không phải con số bắt buộc của đề. QR ngắn hạn giảm cửa sổ tái sử dụng nhưng không ngăn người khác sử dụng ảnh QR trước chủ sở hữu.
+
+\subsection{Lựa chọn phong cách kiến trúc}
+\label{subsec:style-choice}
+\begin{table}[htbp]
+\centering
+\caption{So sánh các phương án kiến trúc}\label{tab:styles}
+\begin{tabular}{|p{0.20\linewidth}|p{0.32\linewidth}|p{0.40\linewidth}|}\hline
+\textbf{Phương án} & \textbf{Ưu điểm} & \textbf{Đánh đổi trong dự án} \\\hline
+Monolith phân lớp & Build, giao dịch và vận hành đơn giản & Các miền dùng chung đơn vị triển khai và khó mở rộng độc lập. \\\hline
+Modular monolith & Giữ ranh giới miền với ít giao tiếp mạng & Vẫn chung tiến trình/triển khai; phù hợp phương án dự phòng cho đội nhỏ. \\\hline
+Microservices theo miền & Service và database logic có ownership riêng & Cần xử lý timeout, eventual consistency, broker, bảo mật service-to-service và nhiều cấu hình. \\\hline
+Event-driven integration & Report, audit, HR không chặn đường scan; có thể phục hồi từ outbox & Giao nhận at-least-once, cần inbox/dedup, DLQ, replay và giám sát backlog. \\\hline
+\end{tabular}
+\end{table}
+
+Nhóm chọn bảy dịch vụ nghiệp vụ Spring Boot, phân lớp bên trong mỗi dịch vụ, cùng Config Server, Eureka Discovery và API Gateway. Sáu dịch vụ sở hữu PostgreSQL riêng theo logic; Audit \& Notification dùng MongoDB. RabbitMQ chuyển sự kiện bất đồng bộ. Mức tải nêu trong đề không tự bắt buộc microservices; quyết định này ưu tiên ranh giới miền và quyền sở hữu dữ liệu, chấp nhận độ phức tạp vận hành phân tán. Không chia nhỏ thêm service chỉ để bọc CRUD.
+
+\subsection{Quyết định xử lý hai vấn đề M2}
+\label{subsec:m2-issues}
+Đối với mất kết nối, Access lưu scan, command, event và outbox trong transaction trước khi trả quyết định. Cùng ID và cùng payload trả về trạng thái đã lưu; cùng ID nhưng payload khác bị xung đột. Khi không rõ cổng đã thực thi hay chưa, kết quả là UNKNOWN và hệ thống yêu cầu tra cứu hoặc xử lý đối soát; không tự gửi một lệnh mới có thể mở cổng lần nữa. Outbox cho phép phát lại event sau broker outage. Thiết kế hiện tại không có Edge authorization: khi WAN tới backend mất, kiosk không được tự cho phép dựa trên cache cũ.
+
+Đối với QR tĩnh, QR service phát credential ký bằng khóa riêng, có mục đích/phiên bản và expiry; Access gọi xác minh/thu hồi và ghi redemption có ràng buộc duy nhất. QR đã tiêu thụ không được tái dùng cho một scan mới. Biện pháp này cần khóa bền vững, đồng hồ đồng bộ và kiểm tra quyền nhà máy. Bảo vệ trước chia sẻ trực tiếp QR cần chính sách vận hành hoặc xác thực bổ sung ngoài phạm vi backend hiện có.
+
+\subsection{Các bước dựng kiến trúc logic và triển khai}
+\label{subsec:architecture-steps}
+Quy trình thiết kế bắt đầu từ tác nhân và luồng nghiệp vụ, tiếp đó phân nhóm bất biến và dữ liệu theo miền, xác định service sở hữu, định nghĩa API/sự kiện, thiết lập ranh giới transaction/retry, ánh xạ module vào service/database và kiểm chứng bằng kiểm thử cùng hợp đồng tích hợp. Về triển khai vật lý, kiến trúc dự kiến bố trí gateway và service trên các máy chủ ứng dụng; database và broker nằm trong mạng riêng; HTTPS được sử dụng tại biên; cấu hình nhạy cảm được quản lý ngoài mã nguồn. Các instance của cùng service sử dụng database thuộc quyền sở hữu của service đó và cần được phân bố qua các miền lỗi độc lập để cung cấp dự phòng. Cấu hình HA, backup/restore, tải và failover trên máy chủ thuê hiện chưa được kiểm chứng; cấu hình chạy cục bộ không đủ làm bằng chứng cho các thuộc tính này.
+

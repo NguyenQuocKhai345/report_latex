@@ -1,0 +1,67 @@
+﻿\section{Hiện thực và đối chiếu yêu cầu}
+\label{sec:implementation}
+
+\subsection{Ánh xạ các thành phần C05--C09}
+\label{subsec:c05-c09}
+Theo tài liệu PRJ1, C05 tiếp nhận scan, C06 xác minh QR, C07 quyết định quyền truy cập, C08 ghi sự kiện/intent và C09 điều phối command/gateway. Phạm vi hiện thực PRJ2 tập trung vào nhóm thành phần này. Bảng~\ref{tab:c-mapping} ánh xạ trách nhiệm thiết kế sang các lớp và service hiện có; tên component trong PRJ1 không nhất thiết trùng với tên package hoặc lớp trong mã nguồn.
+
+\begin{table}[htbp]
+\centering
+\caption{Ánh xạ trách nhiệm C05--C09 tới mã nguồn PRJ2}\label{tab:c-mapping}
+\begin{tabular}{|p{0.09\linewidth}|p{0.22\linewidth}|p{0.36\linewidth}|p{0.22\linewidth}|}\hline
+\textbf{Mã} & \textbf{Trách nhiệm PRJ1} & \textbf{Ánh xạ hiện tại} & \textbf{Mức chứng minh} \\\hline
+C05 & Tiếp nhận scan, xác thực kiosk và trả kết quả & \texttt{ScanController}, DTO scan và \texttt{AccessService} trong access-event-service & Endpoint backend đã có; kiosk vật lý thuộc phạm vi tích hợp client. \\\hline
+C06 & Xác minh QR & \texttt{AccessPolicy}/\texttt{RemoteAccessPolicy} và client API; QR service quản lý credential & Có hợp đồng/API; tích hợp phụ thuộc cấu hình và môi trường triển khai. \\\hline
+C07 & Quyết định quyền truy cập & Ca sử dụng Access gọi policy và quản lý trạng thái lệnh & Luồng nghiệp vụ Access hiện có; quyền nhân viên/nhà máy do Identity/Gate cung cấp. \\\hline
+C08 & Ghi event, intent, history và outbox & \texttt{AccessStore}, \texttt{JpaAccessStore}, repository, migration và outbox & PostgreSQL, transaction và invariant được bao quát bởi kiểm thử. \\\hline
+C09 & Điều phối lệnh cổng và lưu outcome & Controller command/confirmation, \texttt{GateCommand}, client và \texttt{GateSimulator} & Hợp đồng và mô phỏng đã có; chưa nghiệm thu với turnstile vật lý. \\\hline
+\end{tabular}
+\end{table}
+
+Các implementation Java trong Access gồm use case \texttt{AccessService}\allowbreak/\texttt{AccessServiceImpl}, store \texttt{AccessStore}\allowbreak/\texttt{JpaAccessStore}, policy \texttt{AccessPolicy} cùng adapter client, entities cho scan/command/confirmation/event/review, và \texttt{OutboxPublisher}. Database migration tạo schema sự kiện, confirmation evidence và late-evidence review. Tổ chức này tách HTTP, quy tắc use case, policy từ xa và persistence; transaction/constraint ở PostgreSQL bảo vệ invariant khi có nhiều request đồng thời.
+
+\subsection{Luồng scan và phục hồi}
+\label{subsec:scan-recovery}
+Kiosk gửi scan ID, thông tin trạm và QR tới gateway. Gateway xác minh token API và định tuyến tới Access. Access kiểm tra định dạng/yêu cầu, xác thực thông tin thiết bị và gọi policy; khi được phép, hệ thống ghi scan, command, event/outbox trong transaction. Kiosk nhận kết quả cùng command ID và gọi adapter cổng trong LAN. Callback confirmation được lưu riêng; bằng chứng passage đến sau hoặc được xét qua review có actor, lý do và quyền site. Attendance nhận passage event qua RabbitMQ sau khi commit.
+
+Khi client mất response, cùng scan ID được dùng lại; Access trả lại trạng thái đã ghi thay vì tạo command khác. Khi cổng có thể đã tác động nhưng phản hồi bị mất, outcome UNKNOWN cần đối soát. Callback trùng được khử bằng khóa/ID. \texttt{OPENED} không đồng nghĩa \texttt{PASSED}; review không thay đổi bằng chứng gốc mà tạo quyết định và liên kết evidence mới. Cơ chế này giải quyết retry an toàn ở backend, nhưng chưa cung cấp hàng đợi bền vững phía kiosk nếu chính client đó chưa được triển khai.
+
+\subsection{QR, phân quyền và dữ liệu}
+\label{subsec:security-data}
+Identity là OAuth2 Authorization Server/Resource Server; client web dùng Authorization Code + PKCE và thiết bị/service dùng client credentials theo danh tính đã đăng ký. Các service kiểm tra JWT/JWKS, scope và quyền tại miền sở hữu. Access cần xác minh station gắn với thiết bị; không coi station hoặc factory tùy ý trong request là tin cậy. QR dùng khóa ký riêng với API xác minh/thu hồi và thông tin redemption. Event payload giới hạn thông tin định danh, không chứa QR thô, mật khẩu hoặc secret. Audit tách dữ liệu nghiệp vụ khỏi notification job và áp dụng quyền đọc theo nhà máy.
+
+\subsection{Attendance, HR và độ tin cậy sự kiện}
+\label{subsec:attendance-hr}
+Attendance có inbox idempotent, passage append-only, điều chỉnh có duyệt và snapshot revision bất biến. HR Integration quản lý batch, attempt, receipt, issue và lookup theo idempotency key khi kết quả gửi chưa rõ. Batch chỉ được đánh dấu hoàn tất khi receipt khớp batch, key, checksum và số lượng. Monitor deadline theo múi giờ cấu hình cảnh báo kỳ chưa chốt, export thiếu hoặc quá hạn; scheduler không tự phê duyệt dữ liệu công.
+
+Các service ghi outbox trong transaction database của chính owner rồi publisher gửi persistent message với publisher confirm. Consumer commit dữ liệu trước ACK; khi crash có thể nhận lại nên dùng event ID/fingerprint để khử trùng. Queue lỗi có DLQ và công cụ replay giữ nguyên event ID/body. Đây là giao nhận at-least-once, không phải exactly-once. HA của RabbitMQ quorum nhiều node, MongoDB replica set và PostgreSQL failover phải được cấu hình/kiểm chứng riêng.
+
+\subsection{Ma trận truy vết yêu cầu tới hiện thực}
+\label{subsec:traceability}
+\begin{table}[htbp]
+\centering
+\caption{Truy vết yêu cầu M2 và giới hạn chứng cứ}\label{tab:traceability}
+\begin{tabular}{|p{0.13\linewidth}|p{0.38\linewidth}|p{0.37\linewidth}|}\hline
+\textbf{Yêu cầu} & \textbf{Hiện thực/tài liệu liên quan} & \textbf{Trạng thái bằng chứng} \\\hline
+FR-01/02 & Identity User, QR service, API docs và test & Có code service; cần xác nhận tích hợp end-to-end trên môi trường hoàn chỉnh. \\\hline
+FR-03/09 & Gate Station, Access command/confirmation và simulator & Hợp đồng backend/mô phỏng; chưa nghiệm thu phần cứng cổng. \\\hline
+FR-04 & Access scan, command, evidence và event outbox & Module chính đã có test; không suy diễn từ ALLOW/OPENED thành passage. \\\hline
+FR-05/08 & Attendance snapshot; HR batch/receipt/reconciliation & Nghiệp vụ và contract được mô tả; HR thật/correction contract cần tích hợp. \\\hline
+FR-06/07 & Audit/Notification, OAuth2, scope/site checks & Code và test service; cần policy/retention vận hành thực tế. \\\hline
+NFR-01 & Ngưỡng đề ra 2 giây tại tải đổi ca & Chưa có benchmark hai nhà máy; không kết luận đạt. \\\hline
+NFR-02 & Transactional persistence, outbox/inbox, idempotency & Có thiết kế/code/test recovery; không bảo đảm mất WAN ở kiosk được xử lý offline. \\\hline
+NFR-03/04 & RBAC, audit, JWT, hạn chế payload PII & Có cơ chế backend; TLS/secret/retention production cần cấu hình và rà soát. \\\hline
+ISSUE-01/02 & UNKNOWN/retry ID, QR ký/TTL/revocation/redemption & Có cơ chế backend; cần contract test và thiết bị/client thật để nghiệm thu đầy đủ. \\\hline
+\end{tabular}
+\end{table}
+
+\subsection{Kiểm thử và giới hạn hiện trạng}
+\label{subsec:testing-limits}
+Mã nguồn Access Event bao gồm các kiểm thử cho ca sử dụng, policy adapter và cấu hình bảo mật; các service còn lại cũng có bộ kiểm thử riêng. Các kiểm thử cấp service không thay thế kiểm thử tích hợp với HR, đầu đọc QR, controller cổng hoặc môi trường HA. Các báo cáo Surefire hiện có trong repository cho thấy bộ kiểm thử đã được thực thi trước đó; chúng không xác lập khả năng tương thích với thiết bị/hệ thống bên ngoài hoặc hiệu năng production.
+
+Một giới hạn kiến trúc là M1 phân bổ C05--C11 tại edge, trong khi backend M2 sử dụng quyết định tập trung. Khi mất WAN, backend áp dụng nguyên tắc fail-closed; quy trình bảo vệ và thoát hiểm vật lý cần hoạt động độc lập. Repository backend chưa bao gồm kiosk client có durable journal. Ngoài ra, chưa có kết quả đo tải xác nhận ngưỡng hai giây, nghiệm thu HA/failover trên máy chủ thuê, tích hợp HR/turnstile thực tế hoặc chính sách retention được phê duyệt. Các nội dung này là điều kiện cần đánh giá trước khi đưa hệ thống vào vận hành.
+
+\subsection{Mã nguồn}
+\label{subsec:source-url}
+Kho mã nguồn dự án: \href{https://github.com/khieudangbk/TMC-Access-Attendance}{TMC-Access-Attendance} (nhánh \texttt{backend} theo tài liệu đề và README dự án).
+
